@@ -1,5 +1,5 @@
 """
-Tests for our array class
+Tests for our array class.
 """
 from array_class import Array
 

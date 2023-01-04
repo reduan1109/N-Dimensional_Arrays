@@ -1,18 +1,13 @@
 """
-Array class for assignment 2
+An exercise in making a general array class. Note that operations are inplace.
 """
 
 from functools import reduce
 from itertools import chain
 
 class Array:
-
     def __init__(self, shape: tuple, *values):
-        """Initialize an array of n-dimensionality. Elements can only be of type; int, float, bool
-
-        Make sure the values and shape are of the correct type.
-
-        Make sure that you check that your array actually is an array, which means it is homogeneous (one data type).
+        """Initialize an array of n-dimensionality. Elements can only be of type; int, float, bool. Must be homogeneous (one data type).
 
         Args:
             shape (tuple): shape of the array as a tuple. A 1D array with n elements will have shape = (n,).
@@ -24,11 +19,11 @@ class Array:
             ValueError: If the number of values does not fit with the shape.
         """        
 
-        # Check if the shape is tuple
+        # Check if the shape is tuple.
         if not isinstance(shape, tuple):
-            raise TypeError("Shape not a tuple.")
+            raise TypeError("Shape is not a tuple.")
         
-        # Check if shape only contains int and calculates space
+        # Check type of shape and calculates array space.
         space = 0
         for i in shape:
             if not isinstance(i, int):
@@ -36,29 +31,29 @@ class Array:
             else:
                 space = i if space == 0 else space * i
         
-        # Check if values are of valid types and flags the types present
+        # Check if values are of valid types and flags the types present.
         typeInt = False
         typeFloat = False
-        typeComplex = False
+        typeBool = False
         for i in values:
             if isinstance(i, int):
                 typeInt = True
             elif isinstance(i, float):
                 typeFloat = True
             elif isinstance(i, complex):
-                typeComplex = True
+                typeBool = True
             else:
-                raise TypeError("Value(s) are not int, float or complex.")
+                raise TypeError("Value(s) are not int, float or bool.")
             
-        # Checks if the values are homogeneous based on previously mentioned flags
-        if not ((typeInt ^ typeFloat) | (typeFloat ^ typeComplex)):
+        # Checks if the values are homogeneous based on previously mentioned flags.
+        if not ((typeInt ^ typeFloat) | (typeFloat ^ typeBool)):
             raise ValueError("Value(s) are not homogeneous.")
             
-        # Check that the amount of values corresponds to the shape
+        # Check that the amount of values corresponds to the shape.
         if len(values) != space:
-            raise ValueError(f'Number of values does not fit with the shape. {len(values)} values against {space} spaces')
+            raise ValueError(f'Number of values does not fit within the shape. {len(values)} values against {space} spaces.')
         
-        # Set instance attributes
+        # Set instance attributes.
         self.shape = shape
         self.length = len(values)
         self.array = self._arrayGen(shape, values)
@@ -77,37 +72,33 @@ class Array:
         """Returns value on index.
 
         Args:
-            index (int): The index you want to retrieve a value from
+            index (int): The one dimensional index (left to right) that you want to retrieve a value from.
         
         Returns:
-            value (int, float, complex): The value youre trying to retrieve from the array
+            value (int, float, bool): The value you're trying to retrieve from the array.
         
         Raises:
-            TypeError: Index must be of type int
-            ValueError: Index out of bounds
+            TypeError: Index must be of type in.
+            ValueError: Index out of bounds.
         """
-        if not isinstance(self, int):
-            raise TypeError("Index has to be an int")
+        if not isinstance(index, int):
+            raise TypeError("Index has to be an int.")
         
         output = None
-        
         try:
             output = self.array[index]
-             
         except IndexError:
-            raise ValueError("Index is out of bounds")
-        
+            raise ValueError("Index is out of bounds.")
         except:
-            raise Exception("Something went wrong") 
+            raise Exception("Something unexpected went wrong.") 
         
         return output
         
            
     def __add__(self, other):
         """Element-wise adds Array with another Array or number.
-
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        
+        If the method does not support the operation with the supplied arguments (specific data type or shape), it should return NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to add element-wise to this array.
@@ -116,18 +107,20 @@ class Array:
             Array: the sum as a new array.
         
         Raises:
-            TypeError: Other is not Array or int
-            NotImplemented: The opperation youre trying to do is not implemented
+            TypeError: Other is not Array or int.
+            NotImplemented: The operation you're trying to do is not implemented.
             
         """      
         
-        # Check that the method supports the given arguments (check for data type and shape of array)
+        # Check that the method supports the given arguments (check for data type and shape of array).
+        ## Array check.
         if isinstance(other, Array):
             if len(other.shape) != len(self.shape) and other.length == self.length:
-                raise NotImplemented("The shape and size have to be the same")
-            
-            return Array(self.shape, *[sum(x) for x in zip(other.flat_array(), self.flat_array())])
+                raise NotImplemented("The shape of the two arrays is not equal.")
+            else:
+                return Array(self.shape, *[sum(x) for x in zip(other.flat_array(), self.flat_array())])
 
+        ## int/float check.
         elif isinstance(other, (int, float)):
             output = self.flat_array()
             
@@ -141,8 +134,7 @@ class Array:
     def __radd__(self, other):
         """Element-wise adds Array with another Array or number.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        If the method does not support the operation with the supplied arguments (specific data type or shape), it should return NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to add element-wise to this array.
@@ -157,8 +149,7 @@ class Array:
     def __sub__(self, other):
         """Element-wise subtracts an Array or number from this Array.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        If the method does not support the operation with the supplied arguments (specific data type or shape), it should return NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to subtract element-wise from this array.
@@ -187,8 +178,7 @@ class Array:
     def __rsub__(self, other):
         """Element-wise subtracts this Array from a number or Array.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        If the method does not support the operation with the supplied arguments (specific data type or shape), it should return NotImplemented.
 
         Args:
             other (Array, float, int): The array or number being subtracted from.
@@ -218,14 +208,13 @@ class Array:
     def __mul__(self, other):
         """Element-wise multiplies this Array with a number or array.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        If the method does not support the operation with the supplied arguments (specific data type or shape), it should return NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to multiply element-wise to this array.
 
         Returns:
-            Array: a new array with every element multiplied with `other`.
+            Array: a new array with every element multiplied with 'other'.
 
         """
         # Check that the method supports the given arguments (check for data type and shape of array)
@@ -248,14 +237,13 @@ class Array:
     def __rmul__(self, other):
         """Element-wise multiplies this Array with a number or array.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        If the method does not support the operation with the supplied arguments (specific data type or shape), it should return NotImplemented.
 
         Args:
             other (Array, float, int): The array or number to multiply element-wise to this array.
 
         Returns:
-            Array: a new array with every element multiplied with `other`.
+            Array: a new array with every element multiplied with 'other'.
 
         """
         # Hint: this solution/logic applies for all r-methods
@@ -264,8 +252,7 @@ class Array:
     def __eq__(self, other):
         """Compares an Array with another Array.
 
-        If the two array shapes do not match, it should return False.
-        If `other` is an unexpected type, return False.
+        If the two array shapes do not match, it should return False. If 'other' is an unexpected type, return False.
 
         Args:
             other (Array): The array to compare with this array.
@@ -279,15 +266,14 @@ class Array:
     def is_equal(self, other):
         """Compares an Array element-wise with another Array or number.
 
-        If `other` is an array and the two array shapes do not match, this method should raise ValueError.
-        If `other` is not an array or a number, it should return TypeError.
+        If 'other' is an array and the two array shapes do not match, this method should raise ValueError. If 'other' is not an array or a number, it should return TypeError.
 
         Args:
             other (Array, float, int): The array or number to compare with this array.
 
         Returns:
             Array: An array of booleans with True where the two arrays match and False where they do not.
-                   Or if `other` is a number, it returns True where the array is equal to the number and False
+                   Or if 'other' is a number, it returns True where the array is equal to the number and False
                    where it is not.
 
         Raises:
@@ -381,6 +367,7 @@ class Array:
     
     def flat_array(self):
         """Flattens the N-dimensional array of values into a 1-dimensional array.
+        
         Returns:
             list: flat list of array values.
         """
